@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     // Handle the event
     switch (event.type) {
         case "checkout.session.completed": {
-            const session = event.data.object as Stripe.Checkout.Session
+            const session = event.data.object as any
 
             // Retrieve session with line items
             const expandedSession = await stripe.checkout.sessions.retrieve(
@@ -55,8 +55,8 @@ export async function POST(request: NextRequest) {
                         tax: (session.total_details?.amount_tax || 0) / 100,
                         shipping: (session.total_details?.amount_shipping || 0) / 100,
                         total: (session.amount_total || 0) / 100,
-                        shippingAddress: session.shipping_details as object,
-                        billingAddress: session.customer_details as object,
+                        shippingAddress: (session.shipping_details || {}) as any,
+                        billingAddress: (session.customer_details || {}) as any,
                         items: {
                             create: expandedSession.line_items?.data.map((item) => ({
                                 productId: "placeholder", // Would need to store product ID in metadata
