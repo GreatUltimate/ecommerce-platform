@@ -16,85 +16,24 @@ export const metadata: Metadata = {
     description: "Browse our collection of quality products.",
 }
 
-// Mock products - will come from database
-const products = [
-    {
-        id: "1",
-        name: "Premium Wireless Headphones",
-        slug: "premium-wireless-headphones",
-        price: 199.99,
-        compareAtPrice: 249.99,
-        images: ["/placeholder.svg"],
-        category: { name: "Electronics" },
-    },
-    {
-        id: "2",
-        name: "Organic Cotton T-Shirt",
-        slug: "organic-cotton-tshirt",
-        price: 39.99,
-        compareAtPrice: null,
-        images: ["/placeholder.svg"],
-        category: { name: "Clothing" },
-    },
-    {
-        id: "3",
-        name: "Minimalist Watch",
-        slug: "minimalist-watch",
-        price: 149.99,
-        compareAtPrice: 179.99,
-        images: ["/placeholder.svg"],
-        category: { name: "Accessories" },
-    },
-    {
-        id: "4",
-        name: "Leather Wallet",
-        slug: "leather-wallet",
-        price: 59.99,
-        compareAtPrice: null,
-        images: ["/placeholder.svg"],
-        category: { name: "Accessories" },
-    },
-    {
-        id: "5",
-        name: "Smart Fitness Tracker",
-        slug: "smart-fitness-tracker",
-        price: 129.99,
-        compareAtPrice: 159.99,
-        images: ["/placeholder.svg"],
-        category: { name: "Electronics" },
-    },
-    {
-        id: "6",
-        name: "Ceramic Coffee Mug Set",
-        slug: "ceramic-coffee-mug-set",
-        price: 34.99,
-        compareAtPrice: null,
-        images: ["/placeholder.svg"],
-        category: { name: "Home" },
-    },
-    {
-        id: "7",
-        name: "Wireless Charging Pad",
-        slug: "wireless-charging-pad",
-        price: 29.99,
-        compareAtPrice: 39.99,
-        images: ["/placeholder.svg"],
-        category: { name: "Electronics" },
-    },
-    {
-        id: "8",
-        name: "Canvas Backpack",
-        slug: "canvas-backpack",
-        price: 89.99,
-        compareAtPrice: null,
-        images: ["/placeholder.svg"],
-        category: { name: "Accessories" },
-    },
-]
+import { prisma } from "@/lib/prisma"
 
-const categories = ["All", "Electronics", "Clothing", "Accessories", "Home"]
+export default async function ProductsPage() {
+    // Basic fetch of all products
+    const products = await prisma.product.findMany({
+        where: {
+            published: true,
+        },
+        include: {
+            category: true,
+        },
+        orderBy: {
+            createdAt: 'desc',
+        },
+    })
 
-export default function ProductsPage() {
+    const categories = await prisma.category.findMany()
+
     return (
         <div className="container py-8">
             {/* Page Header */}
@@ -121,9 +60,9 @@ export default function ProductsPage() {
                             <SelectValue placeholder="Category" />
                         </SelectTrigger>
                         <SelectContent>
-                            {categories.map((category) => (
-                                <SelectItem key={category} value={category.toLowerCase()}>
-                                    {category}
+                            {categories.map((category: any) => (
+                                <SelectItem key={category.id} value={category.slug || category.name.toLowerCase()}>
+                                    {category.name}
                                 </SelectItem>
                             ))}
                         </SelectContent>
@@ -152,7 +91,7 @@ export default function ProductsPage() {
 
             {/* Product Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {products.map((product) => (
+                {products.map((product: any) => (
                     <ProductCard key={product.id} product={product} />
                 ))}
             </div>

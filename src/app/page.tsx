@@ -4,46 +4,7 @@ import { ProductCard } from "@/components/storefront/product-card"
 import { Header } from "@/components/storefront/header"
 import { Footer } from "@/components/storefront/footer"
 import { ArrowRight, Truck, Shield, RefreshCcw } from "lucide-react"
-
-// Mock featured products for now - will come from database
-const featuredProducts = [
-  {
-    id: "1",
-    name: "Premium Wireless Headphones",
-    slug: "premium-wireless-headphones",
-    price: 199.99,
-    compareAtPrice: 249.99,
-    images: ["/placeholder.svg"],
-    category: { name: "Electronics" },
-  },
-  {
-    id: "2",
-    name: "Organic Cotton T-Shirt",
-    slug: "organic-cotton-tshirt",
-    price: 39.99,
-    compareAtPrice: null,
-    images: ["/placeholder.svg"],
-    category: { name: "Clothing" },
-  },
-  {
-    id: "3",
-    name: "Minimalist Watch",
-    slug: "minimalist-watch",
-    price: 149.99,
-    compareAtPrice: 179.99,
-    images: ["/placeholder.svg"],
-    category: { name: "Accessories" },
-  },
-  {
-    id: "4",
-    name: "Leather Wallet",
-    slug: "leather-wallet",
-    price: 59.99,
-    compareAtPrice: null,
-    images: ["/placeholder.svg"],
-    category: { name: "Accessories" },
-  },
-]
+import { prisma } from "@/lib/prisma"
 
 const features = [
   {
@@ -63,7 +24,21 @@ const features = [
   },
 ]
 
-export default function HomePage() {
+export default async function HomePage() {
+  const featuredProducts = await prisma.product.findMany({
+    where: {
+      featured: true,
+      published: true,
+    },
+    take: 8,
+    include: {
+      category: true,
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  })
+
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
@@ -133,7 +108,7 @@ export default function HomePage() {
               </Button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featuredProducts.map((product) => (
+              {featuredProducts.map((product: any) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
