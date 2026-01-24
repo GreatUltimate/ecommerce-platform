@@ -24,6 +24,10 @@ const features = [
   },
 ]
 
+import { HeroParticles } from "@/components/storefront/hero-particles"
+
+// ... imports remain the same
+
 export default async function HomePage() {
   const featuredProducts = await prisma.product.findMany({
     where: {
@@ -44,8 +48,9 @@ export default async function HomePage() {
       <Header />
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
-          <div className="container py-24 md:py-32">
+        <section className="relative bg-slate-950 text-white overflow-hidden">
+          <HeroParticles />
+          <div className="container relative z-10 py-24 md:py-32">
             <div className="max-w-2xl">
               <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
                 Discover Quality Products
@@ -70,7 +75,7 @@ export default async function HomePage() {
             </div>
           </div>
           {/* Decorative gradient */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent pointer-events-none z-0" />
         </section>
 
         {/* Features Section */}
@@ -108,30 +113,21 @@ export default async function HomePage() {
               </Button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featuredProducts.map((product: any) => (
-                <ProductCard key={product.id} product={product} />
+              {featuredProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={{
+                    ...product,
+                    price: Number(product.price),
+                    compareAtPrice: product.compareAtPrice ? Number(product.compareAtPrice) : null,
+                  }}
+                />
               ))}
             </div>
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="bg-muted/50 py-16 md:py-24">
-          <div className="container text-center">
-            <h2 className="text-2xl md:text-3xl font-bold">Join Our Newsletter</h2>
-            <p className="mt-4 text-muted-foreground max-w-md mx-auto">
-              Subscribe to get special offers, free giveaways, and new product announcements.
-            </p>
-            <form className="mt-8 flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 px-4 py-2 rounded-md border bg-background"
-              />
-              <Button type="submit">Subscribe</Button>
-            </form>
-          </div>
-        </section>
+
       </main>
       <Footer />
     </div>

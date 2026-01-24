@@ -7,14 +7,14 @@ const footerLinks = {
         { name: "Featured", href: "/products?featured=true" },
     ],
     support: [
-        { name: "Contact Us", href: "/contact" },
-        { name: "Shipping Info", href: "/shipping" },
-        { name: "Returns", href: "/returns" },
+        { name: "Contact Us", href: "/pages/contact-us" },
+        { name: "Shipping Info", href: "/pages/shipping-info" },
+        { name: "Returns", href: "/pages/returns" },
     ],
     company: [
-        { name: "About Us", href: "/about" },
-        { name: "Privacy Policy", href: "/privacy" },
-        { name: "Terms of Service", href: "/terms" },
+        { name: "About Us", href: "/pages/about-us" },
+        { name: "Privacy Policy", href: "/pages/privacy-policy" },
+        { name: "Terms of Service", href: "/pages/terms-of-service" },
     ],
 }
 

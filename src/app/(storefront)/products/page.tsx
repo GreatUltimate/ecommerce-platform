@@ -32,6 +32,13 @@ export default async function ProductsPage() {
         },
     })
 
+    // Convert Decimal to number for serialization
+    const formattedProducts = products.map((product) => ({
+        ...product,
+        price: Number(product.price),
+        compareAtPrice: product.compareAtPrice ? Number(product.compareAtPrice) : null,
+    }))
+
     const categories = await prisma.category.findMany()
 
     return (
@@ -86,12 +93,12 @@ export default async function ProductsPage() {
 
             {/* Results count */}
             <p className="text-sm text-muted-foreground mb-6">
-                Showing {products.length} products
+                Showing {formattedProducts.length} products
             </p>
 
             {/* Product Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {products.map((product: any) => (
+                {formattedProducts.map((product: any) => (
                     <ProductCard key={product.id} product={product} />
                 ))}
             </div>

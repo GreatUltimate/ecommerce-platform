@@ -13,6 +13,8 @@ import {
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 
+import { auth } from "@/lib/auth"
+
 const sidebarLinks = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { name: "Products", href: "/admin/products", icon: Package },
@@ -22,16 +24,16 @@ const sidebarLinks = [
     { name: "Settings", href: "/admin/settings", icon: Settings },
 ]
 
-export default function AdminLayout({
+export default async function AdminLayout({
     children,
 }: {
     children: React.ReactNode
 }) {
-    // TODO: Check if user is admin
-    // const session = await auth()
-    // if (!session?.user || session.user.role !== "ADMIN") {
-    //   redirect("/login")
-    // }
+    // Check if user is admin
+    const session = await auth()
+    if (!session?.user || session.user.role !== "ADMIN") {
+        redirect("/login")
+    }
 
     return (
         <div className="flex min-h-screen">

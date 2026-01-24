@@ -1,6 +1,8 @@
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
+import { CartProvider } from "@/contexts/cart-context"
+import { Toaster } from "sonner"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -22,9 +24,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} font-sans antialiased`}>
-        {children}
+      <body className={`${inter.variable} font-sans antialiased`} suppressHydrationWarning>
+        <CartProvider>
+          {children}
+          <Toaster position="bottom-right" richColors />
+        </CartProvider>
       </body>
     </html>
   )
 }
+

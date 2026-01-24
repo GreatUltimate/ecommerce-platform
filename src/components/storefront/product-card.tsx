@@ -1,9 +1,14 @@
+"use client"
+
 import Image from "next/image"
 import Link from "next/link"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ShoppingCart } from "lucide-react"
+import { ShoppingCart, Check } from "lucide-react"
+import { useCart } from "@/contexts/cart-context"
+import { toast } from "sonner"
+import { useState } from "react"
 
 interface ProductCardProps {
     product: {
@@ -20,10 +25,29 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+    const { addItem } = useCart()
+    const [isAdding, setIsAdding] = useState(false)
+
     const hasDiscount = product.compareAtPrice && product.compareAtPrice > product.price
     const discountPercentage = hasDiscount
         ? Math.round(((product.compareAtPrice! - product.price) / product.compareAtPrice!) * 100)
         : 0
+
+    const handleAddToCart = () => {
+        setIsAdding(true)
+        addItem({
+            productId: product.id,
+            name: product.name,
+            slug: product.slug,
+            price: product.price,
+            image: product.images[0] || "/placeholder-product.jpg",
+            quantity: 1,
+        })
+        toast.success(`${product.name} added to cart!`, {
+            description: "Click the cart icon to view your items.",
+        })
+        setTimeout(() => setIsAdding(false), 1000)
+    }
 
     return (
         <Card className="group overflow-hidden">
@@ -71,11 +95,26 @@ export function ProductCard({ product }: ProductCardProps) {
                 </div>
             </CardContent>
             <CardFooter className="p-4 pt-0">
-                <Button className="w-full" size="sm">
-                    <ShoppingCart className="h-4 w-4 mr-2" />
-                    Add to Cart
+                <Button
+                    className="w-full"
+                    size="sm"
+                    onClick={handleAddToCart}
+                    disabled={isAdding}
+                >
+                    {isAdding ? (
+                        <>
+                            <Check className="h-4 w-4 mr-2" />
+                            Added!
+                        </>
+                    ) : (
+                        <>
+                            <ShoppingCart className="h-4 w-4 mr-2" />
+                            Add to Cart
+                        </>
+                    )}
                 </Button>
             </CardFooter>
         </Card>
     )
 }
+

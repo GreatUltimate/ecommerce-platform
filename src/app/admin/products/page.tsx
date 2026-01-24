@@ -1,3 +1,4 @@
+import { prisma } from "@/lib/prisma"
 import { Metadata } from "next"
 import Link from "next/link"
 import Image from "next/image"
@@ -26,51 +27,12 @@ export const metadata: Metadata = {
     description: "Manage your products.",
 }
 
-// Mock products - will come from database
-const products = [
-    {
-        id: "1",
-        name: "Premium Wireless Headphones",
-        slug: "premium-wireless-headphones",
-        price: 199.99,
-        inventory: 50,
-        published: true,
-        image: "/placeholder-product.jpg",
-        category: "Electronics",
-    },
-    {
-        id: "2",
-        name: "Organic Cotton T-Shirt",
-        slug: "organic-cotton-tshirt",
-        price: 39.99,
-        inventory: 120,
-        published: true,
-        image: "/placeholder-product.jpg",
-        category: "Clothing",
-    },
-    {
-        id: "3",
-        name: "Minimalist Watch",
-        slug: "minimalist-watch",
-        price: 149.99,
-        inventory: 25,
-        published: true,
-        image: "/placeholder-product.jpg",
-        category: "Accessories",
-    },
-    {
-        id: "4",
-        name: "Leather Wallet",
-        slug: "leather-wallet",
-        price: 59.99,
-        inventory: 0,
-        published: false,
-        image: "/placeholder-product.jpg",
-        category: "Accessories",
-    },
-]
+export default async function AdminProductsPage() {
+    const products = await prisma.product.findMany({
+        orderBy: { createdAt: 'desc' },
+        include: { category: true }
+    })
 
-export default function AdminProductsPage() {
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -115,60 +77,76 @@ export default function AdminProductsPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {products.map((product) => (
-                                <TableRow key={product.id}>
-                                    <TableCell>
-                                        <div className="relative w-12 h-12 rounded-md overflow-hidden bg-muted">
-                                            <Image
-                                                src={product.image}
-                                                alt={product.name}
-                                                fill
-                                                className="object-cover"
-                                            />
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="font-medium">{product.name}</TableCell>
-                                    <TableCell>{product.category}</TableCell>
-                                    <TableCell>${product.price.toFixed(2)}</TableCell>
-                                    <TableCell>
-                                        <span className={product.inventory === 0 ? "text-red-600" : ""}>
-                                            {product.inventory}
-                                        </span>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Badge variant={product.published ? "default" : "secondary"}>
-                                            {product.published ? "Published" : "Draft"}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="icon">
-                                                    <MoreHorizontal className="h-4 w-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem asChild>
-                                                    <Link href={`/products/${product.slug}`} target="_blank">
-                                                        <Eye className="h-4 w-4 mr-2" />
-                                                        View
-                                                    </Link>
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem asChild>
-                                                    <Link href={`/admin/products/${product.id}`}>
-                                                        <Pencil className="h-4 w-4 mr-2" />
-                                                        Edit
-                                                    </Link>
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem className="text-destructive">
-                                                    <Trash2 className="h-4 w-4 mr-2" />
-                                                    Delete
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
+                            {products.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={7} className="text-center py-10 text-muted-foreground">
+                                        No products found. Add your first product!
                                     </TableCell>
                                 </TableRow>
-                            ))}
+                            ) : (
+                                products.map((product) => (
+                                    <TableRow key={product.id}>
+                                        <TableCell>
+                                            <div className="relative w-12 h-12 rounded-md overflow-hidden bg-muted">
+                                                {product.images[0] ? (
+                                                    <Image
+                                                        src={product.images[0]}
+                                                        alt={product.name}
+                                                        fill
+                                                        className="object-cover"
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center bg-secondary text-secondary-foreground text-xs">
+                                                        No Img
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="font-medium">{product.name}</TableCell>
+                                        <TableCell>{product.category?.name || "Uncategorized"}</TableCell>
+                                        <TableCell>
+                                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(product.price))}
+                                        </TableCell>
+                                        <TableCell>
+                                            <span className={product.inventory === 0 ? "text-red-600" : ""}>
+                                                {product.inventory}
+                                            </span>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Badge variant={product.published ? "default" : "secondary"}>
+                                                {product.published ? "Published" : "Draft"}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="icon">
+                                                        <MoreHorizontal className="h-4 w-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuItem asChild>
+                                                        <Link href={`/products/${product.slug}`} target="_blank">
+                                                            <Eye className="h-4 w-4 mr-2" />
+                                                            View
+                                                        </Link>
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem asChild>
+                                                        <Link href={`/admin/products/${product.id}`}>
+                                                            <Pencil className="h-4 w-4 mr-2" />
+                                                            Edit
+                                                        </Link>
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem className="text-destructive">
+                                                        <Trash2 className="h-4 w-4 mr-2" />
+                                                        Delete
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
                         </TableBody>
                     </Table>
                 </CardContent>
